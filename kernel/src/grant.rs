@@ -24,7 +24,7 @@ impl<'a, T: 'a + ?Sized> Borrowed<'a, T> {
         }
     }
 
-    pub fn appid(&self) -> ProcessId {
+    pub fn processid(&self) -> ProcessId {
         self.appid
     }
 }
@@ -90,7 +90,7 @@ impl<'a, T: Default> AppliedGrant<'a, T> {
         // memory may not yet be allocated, it can only return a `*mut
         // u8` here. We will eventually convert this to a `*mut T`.
         let grant_num = grant.grant_num;
-        let appid = process.appid();
+        let appid = process.processid();
         if let Some(untyped_grant_ptr) = process.get_grant_ptr(grant_num) {
             // If the grant pointer is NULL then the memory for the
             // GrantRegion needs to be allocated. If the grant pointer is all 1s
@@ -193,9 +193,9 @@ impl<'a, T: Default> AppliedGrant<'a, T> {
         F: FnOnce(&mut Borrowed<T>, &mut Allocator) -> R,
     {
         let mut allocator = Allocator {
-            appid: self.process.appid(),
+            appid: self.process.processid(),
         };
-        let mut root = Borrowed::new(self.grant, self.process.appid());
+        let mut root = Borrowed::new(self.grant, self.process.processid());
         // Mark the grant region as entered by replacing its grant pointer with
         // all 1s. This allows us to check whether the grant region is already entered.
         unsafe {
@@ -228,7 +228,7 @@ impl<T: ?Sized> DynamicGrant<T> {
         DynamicGrant { data, appid }
     }
 
-    pub fn appid(&self) -> ProcessId {
+    pub fn processid(&self) -> ProcessId {
         self.appid
     }
 
