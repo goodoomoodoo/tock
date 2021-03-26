@@ -185,7 +185,7 @@ impl hil::sensors::NineDofClient for NineDof<'_> {
                     false
                 } else if app.pending_command {
                     app.pending_command = false;
-                    self.current_app.set(app.appid());
+                    self.current_app.set(app.processid());
                     self.call_driver(app.command, app.arg1) == ReturnCode::SUCCESS
                 } else {
                     false

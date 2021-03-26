@@ -375,7 +375,7 @@ impl<'a> NonvolatileStorage<'a> {
                     if app.pending_command {
                         app.pending_command = false;
                         self.current_user.set(NonvolatileUser::App {
-                            app_id: app.appid(),
+                            app_id: app.processid(),
                         });
                         if let Ok(()) =
                             self.userspace_call_driver(app.command, app.offset, app.length)

@@ -346,7 +346,7 @@ impl uart::TransmitClient for Console<'_> {
                 let started_tx = cntr.enter(|app, _| {
                     if app.pending_write {
                         app.pending_write = false;
-                        match self.send_continue(app.appid(), app) {
+                        match self.send_continue(app.processid(), app) {
                             Ok(more_to_send) => more_to_send,
                             Err(return_code) => {
                                 // XXX This shouldn't ever happen?

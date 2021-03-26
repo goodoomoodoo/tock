@@ -179,8 +179,8 @@ impl<'a> TextScreen<'a> {
             let current_command = app.enter(|app, _| {
                 if app.pending_command {
                     app.pending_command = false;
-                    self.current_app.set(app.appid());
-                    let r = self.do_command(app.command, app.data1, app.data2, app.appid());
+                    self.current_app.set(app.processid());
+                    let r = self.do_command(app.command, app.data1, app.data2, app.processid());
                     if r != ReturnCode::SUCCESS {
                         self.current_app.clear();
                     }

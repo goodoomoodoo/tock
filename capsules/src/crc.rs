@@ -136,7 +136,7 @@ impl<'a, C: hil::crc::CRC<'a>> Crc<'a, C> {
 
                     if rcode == ReturnCode::SUCCESS {
                         // The unit is now computing a CRC for this app
-                        self.serving_app.set(app.appid());
+                        self.serving_app.set(app.processid());
                         found = true;
                     } else {
                         // The app's request failed

@@ -153,7 +153,7 @@ impl<'a, A: hil::time::Alarm<'a>> Buzzer<'a, A> {
                 // If this app has a pending command let's use it.
                 app.pending_command.take().map_or(false, |command| {
                     // Mark this driver as being in use.
-                    self.active_app.set(app.appid());
+                    self.active_app.set(app.processid());
                     // Actually make the buzz happen.
                     self.buzz(command) == ReturnCode::SUCCESS
                 })

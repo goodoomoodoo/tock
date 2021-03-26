@@ -72,7 +72,7 @@ impl<'u, U: Transmit<'u>> TransmitClient for LowLevelDebug<'u, U> {
             let (app_num, first_entry) = applied_grant.enter(|owned_app_data, _| {
                 owned_app_data.queue.rotate_left(1);
                 (
-                    owned_app_data.appid().id(),
+                    owned_app_data.processid().id(),
                     owned_app_data.queue[QUEUE_SIZE - 1].take(),
                 )
             });

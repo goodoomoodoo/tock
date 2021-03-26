@@ -150,7 +150,7 @@ impl<'a> UDPDriver<'a> {
         for app in self.apps.iter() {
             app.enter(|app, _| {
                 if app.pending_tx.is_some() {
-                    pending_app = Some(app.appid());
+                    pending_app = Some(app.processid());
                 }
             });
             if pending_app.is_some() {
