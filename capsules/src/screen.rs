@@ -17,7 +17,7 @@ use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil;
 use kernel::hil::screen::{ScreenPixelFormat, ScreenRotation};
 use kernel::{
-    AppId, CommandReturn, Driver, ErrorCode, Grant, Read, ReadOnlyAppSlice, ReturnCode, Upcall,
+    ProcessId, CommandReturn, Driver, ErrorCode, Grant, Read, ReadOnlyAppSlice, ReturnCode, Upcall,
 };
 
 /// Syscall driver number.
@@ -114,7 +114,7 @@ pub struct Screen<'a> {
     screen_setup: Option<&'a dyn hil::screen::ScreenSetup>,
     apps: Grant<App>,
     screen_ready: Cell<bool>,
-    current_app: OptionalCell<AppId>,
+    current_app: OptionalCell<ProcessId>,
     pixel_format: Cell<ScreenPixelFormat>,
     buffer: TakeCell<'static, [u8]>,
 }
@@ -145,7 +145,7 @@ impl<'a> Screen<'a> {
         command: ScreenCommand,
         data1: usize,
         data2: usize,
-        appid: AppId,
+        appid: ProcessId,
     ) -> CommandReturn {
         let res = self
             .apps
@@ -183,7 +183,7 @@ impl<'a> Screen<'a> {
         command: ScreenCommand,
         data1: usize,
         data2: usize,
-        appid: AppId,
+        appid: ProcessId,
     ) -> ReturnCode {
         match command {
             ScreenCommand::SetBrightness => self.screen.set_brightness(data1),
@@ -505,7 +505,7 @@ impl<'a> Driver for Screen<'a> {
         &self,
         subscribe_num: usize,
         mut callback: Upcall,
-        app_id: AppId,
+        app_id: ProcessId,
     ) -> Result<Upcall, (Upcall, ErrorCode)> {
         let res = match subscribe_num {
             0 => self
@@ -528,7 +528,7 @@ impl<'a> Driver for Screen<'a> {
         command_num: usize,
         data1: usize,
         data2: usize,
-        appid: AppId,
+        appid: ProcessId,
     ) -> CommandReturn {
         match command_num {
             0 =>
@@ -583,7 +583,7 @@ impl<'a> Driver for Screen<'a> {
 
     fn allow_readonly(
         &self,
-        appid: AppId,
+        appid: ProcessId,
         allow_num: usize,
         mut slice: ReadOnlyAppSlice,
     ) -> Result<ReadOnlyAppSlice, (ReadOnlyAppSlice, ErrorCode)> {

@@ -54,7 +54,7 @@ use core::{cmp, mem};
 use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil;
 use kernel::{
-    AppId, CommandReturn, Driver, ErrorCode, Grant, Read, ReadWrite, ReadWriteAppSlice, ReturnCode,
+    ProcessId, CommandReturn, Driver, ErrorCode, Grant, Read, ReadWrite, ReadWriteAppSlice, ReturnCode,
     Upcall,
 };
 
@@ -69,7 +69,7 @@ pub const DRIVER_NUM: usize = driver::NUM::Adc as usize;
 pub struct AdcVirtualized<'a> {
     drivers: &'a [&'a dyn hil::adc::AdcChannel],
     apps: Grant<AppSys>,
-    current_app: OptionalCell<AppId>,
+    current_app: OptionalCell<ProcessId>,
 }
 
 /// ADC syscall driver, used by applications to interact with ADC.
@@ -87,7 +87,7 @@ pub struct AdcDedicated<'a, A: hil::adc::Adc + hil::adc::AdcHighSpeed> {
 
     // App state
     apps: Grant<App>,
-    appid: OptionalCell<AppId>,
+    appid: OptionalCell<ProcessId>,
     channel: Cell<usize>,
 
     // ADC buffers
@@ -646,7 +646,7 @@ impl<'a> AdcVirtualized<'a> {
     }
 
     /// Enqueue the command to be executed when the ADC is available.
-    fn enqueue_command(&self, command: Operation, channel: usize, appid: AppId) -> ReturnCode {
+    fn enqueue_command(&self, command: Operation, channel: usize, appid: ProcessId) -> ReturnCode {
         if channel < self.drivers.len() {
             self.apps
                 .enter(appid, |app, _| {
@@ -1084,7 +1084,7 @@ impl<A: hil::adc::Adc + hil::adc::AdcHighSpeed> Driver for AdcDedicated<'_, A> {
     /// - `slice` - representation of application memory to copy data into
     fn allow_readwrite(
         &self,
-        appid: AppId,
+        appid: ProcessId,
         allow_num: usize,
         mut slice: ReadWriteAppSlice,
     ) -> Result<ReadWriteAppSlice, (ReadWriteAppSlice, ErrorCode)> {
@@ -1168,7 +1168,7 @@ impl<A: hil::adc::Adc + hil::adc::AdcHighSpeed> Driver for AdcDedicated<'_, A> {
         &self,
         subscribe_num: usize,
         mut callback: Upcall,
-        appid: AppId,
+        appid: ProcessId,
     ) -> Result<Upcall, (Upcall, ErrorCode)> {
         // Return true if this app already owns the ADC capsule, if no app owns
         // the ADC capsule, or if the app that is marked as owning the ADC
@@ -1228,7 +1228,7 @@ impl<A: hil::adc::Adc + hil::adc::AdcHighSpeed> Driver for AdcDedicated<'_, A> {
         command_num: usize,
         channel: usize,
         frequency: usize,
-        appid: AppId,
+        appid: ProcessId,
     ) -> CommandReturn {
         // Return true if this app already owns the ADC capsule, if no app owns
         // the ADC capsule, or if the app that is marked as owning the ADC
@@ -1343,7 +1343,7 @@ impl Driver for AdcVirtualized<'_> {
         &self,
         subscribe_num: usize,
         mut callback: Upcall,
-        app_id: AppId,
+        app_id: ProcessId,
     ) -> Result<Upcall, (Upcall, ErrorCode)> {
         match subscribe_num {
             // subscribe to ADC sample done (from all types of sampling)
@@ -1369,7 +1369,7 @@ impl Driver for AdcVirtualized<'_> {
     /// - `channel` - requested channel value
     /// - `_` - value sent by the application, unused
     /// - `appid` - application identifier
-    fn command(&self, command_num: usize, channel: usize, _: usize, appid: AppId) -> CommandReturn {
+    fn command(&self, command_num: usize, channel: usize, _: usize, appid: ProcessId) -> CommandReturn {
         match command_num {
             // This driver exists and return the number of channels
             0 => CommandReturn::success_u32(self.drivers.len() as u32),

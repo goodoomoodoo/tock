@@ -266,7 +266,7 @@ pub fn load_processes<C: Chip>(
 /// This trait is implemented by process structs.
 pub trait ProcessType {
     /// Returns the process's identifier
-    fn appid(&self) -> AppId;
+    fn appid(&self) -> ProcessId;
 
     /// Queue a `Task` for the process. This will be added to a per-process
     /// buffer and executed by the scheduler. `Task`s are some function the app
@@ -589,23 +589,23 @@ pub trait ProcessType {
 ///
 /// This should be treated as an opaque type that can be used to represent an
 /// application on the board without requiring an actual reference to a
-/// `ProcessType` object. Having this `AppId` reference type is useful for
-/// managing ownership and type issues in Rust, but more importantly `AppId`
+/// `ProcessType` object. Having this `ProcessId` reference type is useful for
+/// managing ownership and type issues in Rust, but more importantly `ProcessId`
 /// serves as a tool for capsules to hold pointers to applications.
 ///
-/// Since `AppId` implements `Copy`, having an `AppId` does _not_ ensure that
-/// the process the `AppId` refers to is still valid. The process may have been
+/// Since `ProcessId` implements `Copy`, having an `ProcessId` does _not_ ensure that
+/// the process the `ProcessId` refers to is still valid. The process may have been
 /// removed, terminated, or restarted as a new process. Therefore, all uses of
-/// `AppId` in the kernel must check that the `AppId` is still valid. This check
+/// `ProcessId` in the kernel must check that the `ProcessId` is still valid. This check
 /// happens automatically when `.index()` is called, as noted by the return
 /// type: `Option<usize>`. `.index()` will return the index of the process in
 /// the processes array, but if the process no longer exists then `None` is
 /// returned.
 ///
-/// Outside of the kernel crate, holders of an `AppId` may want to use `.id()`
+/// Outside of the kernel crate, holders of an `ProcessId` may want to use `.id()`
 /// to retrieve a simple identifier for the process that can be communicated
 /// over a UART bus or syscall interface. This call is guaranteed to return a
-/// suitable identifier for the `AppId`, but does not check that the
+/// suitable identifier for the `ProcessId`, but does not check that the
 /// corresponding application still exists.
 ///
 /// This type also provides capsules an interface for interacting with processes
@@ -616,7 +616,7 @@ pub trait ProcessType {
 /// the `get_editable_flash_range()` function so they can safely allow an app
 /// to modify its own flash.
 #[derive(Clone, Copy)]
-pub struct AppId {
+pub struct ProcessId {
     /// Reference to the main kernel struct. This is needed for checking on
     /// certain properties of the referred app (like its editable bounds), but
     /// also for checking that the index is valid.
@@ -635,38 +635,38 @@ pub struct AppId {
     /// when referring to specific applications across the syscall interface.
     ///
     /// The combination of (index, identifier) is used to check if the app this
-    /// `AppId` refers to is still valid. If the stored identifier in the
+    /// `ProcessId` refers to is still valid. If the stored identifier in the
     /// process at the given index does not match the value saved here, then the
-    /// process moved or otherwise ended, and this `AppId` is no longer valid.
+    /// process moved or otherwise ended, and this `ProcessId` is no longer valid.
     identifier: usize,
 }
 
-impl PartialEq for AppId {
-    fn eq(&self, other: &AppId) -> bool {
+impl PartialEq for ProcessId {
+    fn eq(&self, other: &ProcessId) -> bool {
         self.identifier == other.identifier
     }
 }
 
-impl Eq for AppId {}
+impl Eq for ProcessId {}
 
-impl fmt::Debug for AppId {
+impl fmt::Debug for ProcessId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.identifier)
     }
 }
 
-impl AppId {
-    /// Create a new `AppId` object based on the app identifier and its index
+impl ProcessId {
+    /// Create a new `ProcessId` object based on the app identifier and its index
     /// in the processes array.
-    pub(crate) fn new(kernel: &'static Kernel, identifier: usize, index: usize) -> AppId {
-        AppId {
+    pub(crate) fn new(kernel: &'static Kernel, identifier: usize, index: usize) -> ProcessId {
+        ProcessId {
             kernel: kernel,
             identifier: identifier,
             index: index,
         }
     }
 
-    /// Create a new `AppId` object based on the app identifier and its index
+    /// Create a new `ProcessId` object based on the app identifier and its index
     /// in the processes array.
     ///
     /// This constructor is public but protected with a capability so that
@@ -676,8 +676,8 @@ impl AppId {
         identifier: usize,
         index: usize,
         _capability: &dyn ExternalProcessCapability,
-    ) -> AppId {
-        AppId {
+    ) -> ProcessId {
+        ProcessId {
             kernel: kernel,
             identifier: identifier,
             index: index,
@@ -686,7 +686,7 @@ impl AppId {
 
     /// Get the location of this app in the processes array.
     ///
-    /// This will return `Some(index)` if the identifier stored in this `AppId`
+    /// This will return `Some(index)` if the identifier stored in this `ProcessId`
     /// matches the app saved at the known index. If the identifier does not
     /// match then `None` will be returned.
     pub(crate) fn index(&self) -> Option<usize> {
@@ -698,10 +698,10 @@ impl AppId {
         }
     }
 
-    /// Get a `usize` unique identifier for the app this `AppId` refers to.
+    /// Get a `usize` unique identifier for the app this `ProcessId` refers to.
     ///
     /// This function should not generally be used, instead code should just use
-    /// the `AppId` object itself to refer to various apps on the system.
+    /// the `ProcessId` object itself to refer to various apps on the system.
     /// However, getting just a `usize` identifier is particularly useful when
     /// referring to a specific app with things outside of the kernel, say for
     /// userspace (e.g. IPC) or tockloader (e.g. for debugging) where a concrete
@@ -946,7 +946,7 @@ pub enum Task {
     /// from a capsule.
     FunctionCall(FunctionCall),
     /// An IPC operation that needs additional setup to configure memory access.
-    IPC((AppId, ipc::IPCUpcallType)),
+    IPC((ProcessId, ipc::IPCUpcallType)),
 }
 
 /// Enumeration to identify whether a function call for a process comes directly
@@ -1026,7 +1026,7 @@ struct ProcessDebug {
 pub struct Process<'a, C: 'static + Chip> {
     /// Identifier of this process and the index of the process in the process
     /// table.
-    app_id: Cell<AppId>,
+    app_id: Cell<ProcessId>,
 
     /// Pointer to the main Kernel struct.
     kernel: &'static Kernel,
@@ -1132,7 +1132,7 @@ pub struct Process<'a, C: 'static + Chip> {
 }
 
 impl<C: Chip> ProcessType for Process<'_, C> {
-    fn appid(&self) -> AppId {
+    fn appid(&self) -> ProcessId {
         self.app_id.get()
     }
 
@@ -2390,7 +2390,7 @@ impl<C: 'static + Chip> Process<'_, C> {
 
         process
             .app_id
-            .set(AppId::new(kernel, unique_identifier, index));
+            .set(ProcessId::new(kernel, unique_identifier, index));
         process.kernel = kernel;
         process.chip = chip;
         process.allow_high_water_mark = Cell::new(initial_allow_high_water_mark);
@@ -2488,13 +2488,13 @@ impl<C: 'static + Chip> Process<'_, C> {
     fn restart(&self) -> Result<(), ErrorCode> {
         // We need a new process identifier for this process since the restarted
         // version is in effect a new process. This is also necessary to
-        // invalidate any stored `AppId`s that point to the old version of the
+        // invalidate any stored `ProcessId`s that point to the old version of the
         // process. However, the process has not moved locations in the
         // processes array, so we copy the existing index.
         let old_index = self.app_id.get().index;
         let new_identifier = self.kernel.create_process_identifier();
         self.app_id
-            .set(AppId::new(self.kernel, new_identifier, old_index));
+            .set(ProcessId::new(self.kernel, new_identifier, old_index));
 
         // Reset debug information that is per-execution and not per-process.
         self.debug.map(|debug| {

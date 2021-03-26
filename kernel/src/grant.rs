@@ -5,7 +5,7 @@ use core::mem::{align_of, size_of};
 use core::ops::{Deref, DerefMut};
 use core::ptr::{slice_from_raw_parts_mut, write, NonNull};
 
-use crate::process::AppId;
+use crate::process::ProcessId;
 use crate::process::{Error, ProcessType};
 use crate::sched::Kernel;
 
@@ -13,18 +13,18 @@ use crate::sched::Kernel;
 /// This is passed to capsules when they try to enter a grant region.
 pub struct Borrowed<'a, T: 'a + ?Sized> {
     data: &'a mut T,
-    appid: AppId,
+    appid: ProcessId,
 }
 
 impl<'a, T: 'a + ?Sized> Borrowed<'a, T> {
-    fn new(data: &'a mut T, appid: AppId) -> Borrowed<'a, T> {
+    fn new(data: &'a mut T, appid: ProcessId) -> Borrowed<'a, T> {
         Borrowed {
             data: data,
             appid: appid,
         }
     }
 
-    pub fn appid(&self) -> AppId {
+    pub fn appid(&self) -> ProcessId {
         self.appid
     }
 }
@@ -215,7 +215,7 @@ impl<'a, T: Default> AppliedGrant<'a, T> {
 /// Grant which was dynamically allocated in a particular app's memory.
 pub struct DynamicGrant<T: ?Sized> {
     data: NonNull<T>,
-    appid: AppId,
+    appid: ProcessId,
 }
 
 impl<T: ?Sized> DynamicGrant<T> {
@@ -224,11 +224,11 @@ impl<T: ?Sized> DynamicGrant<T> {
     /// # Safety
     ///
     /// `data` must point to a valid, initialized `T`.
-    unsafe fn new(data: NonNull<T>, appid: AppId) -> Self {
+    unsafe fn new(data: NonNull<T>, appid: ProcessId) -> Self {
         DynamicGrant { data, appid }
     }
 
-    pub fn appid(&self) -> AppId {
+    pub fn appid(&self) -> ProcessId {
         self.appid
     }
 
@@ -256,7 +256,7 @@ impl<T: ?Sized> DynamicGrant<T> {
 }
 
 pub struct Allocator {
-    appid: AppId,
+    appid: ProcessId,
 }
 
 impl Allocator {
@@ -367,7 +367,7 @@ impl<T: Default> Grant<T> {
         }
     }
 
-    pub fn enter<F, R>(&self, appid: AppId, fun: F) -> Result<R, Error>
+    pub fn enter<F, R>(&self, appid: ProcessId, fun: F) -> Result<R, Error>
     where
         F: FnOnce(&mut Borrowed<T>, &mut Allocator) -> R,
     {
@@ -436,7 +436,7 @@ impl<'a, T: Default> Iterator for Iter<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let grant = self.grant;
-        // Get the next `AppId` from the kernel processes array that is setup to use this grant.
+        // Get the next `ProcessId` from the kernel processes array that is setup to use this grant.
         // Since the iterator itself is saved calling this function
         // again will start where we left off.
         let skip_entered_grants = self.skip_entered_grants;

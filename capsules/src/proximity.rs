@@ -52,7 +52,7 @@ use core::cell::Cell;
 use core::mem;
 use kernel::hil;
 use kernel::ReturnCode;
-use kernel::{AppId, CommandReturn, Driver, ErrorCode, Grant, Upcall};
+use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Grant, Upcall};
 
 /// Syscall driver number.
 use crate::driver;
@@ -109,7 +109,7 @@ impl<'a> ProximitySensor<'a> {
         command: ProximityCommand,
         arg1: usize,
         arg2: usize,
-        appid: AppId,
+        appid: ProcessId,
     ) -> CommandReturn {
         // Enqueue command by saving command type, args, appid within app struct in grant region
         self.apps
@@ -284,7 +284,7 @@ impl Driver for ProximitySensor<'_> {
         &self,
         subscribe_num: usize,
         mut callback: Upcall,
-        app_id: AppId,
+        app_id: ProcessId,
     ) -> Result<Upcall, (Upcall, ErrorCode)> {
         let res = match subscribe_num {
             0 => self
@@ -300,7 +300,7 @@ impl Driver for ProximitySensor<'_> {
         }
     }
 
-    fn command(&self, command_num: usize, arg1: usize, arg2: usize, appid: AppId) -> CommandReturn {
+    fn command(&self, command_num: usize, arg1: usize, arg2: usize, appid: ProcessId) -> CommandReturn {
         match command_num {
             // check whether the driver exist!!
             0 => CommandReturn::success(),

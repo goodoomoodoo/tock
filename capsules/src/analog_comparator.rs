@@ -39,7 +39,7 @@ pub const DRIVER_NUM: usize = driver::NUM::AnalogComparator as usize;
 
 use core::cell::Cell;
 use kernel::hil;
-use kernel::{AppId, CommandReturn, Driver, ErrorCode, ReturnCode, Upcall};
+use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, ReturnCode, Upcall};
 
 pub struct AnalogComparator<'a, A: hil::analog_comparator::AnalogComparator<'a> + 'a> {
     // Analog Comparator driver
@@ -117,7 +117,7 @@ impl<'a, A: hil::analog_comparator::AnalogComparator<'a>> Driver for AnalogCompa
     /// - `3`: Stop interrupt-based comparisons.
     ///        Input x chooses the desired comparator ACx (e.g. 0 or 1 for
     ///        hail, 0-3 for imix)
-    fn command(&self, command_num: usize, channel: usize, _: usize, _: AppId) -> CommandReturn {
+    fn command(&self, command_num: usize, channel: usize, _: usize, _: ProcessId) -> CommandReturn {
         match command_num {
             0 => CommandReturn::success_u32(self.channels.len() as u32),
 
@@ -139,7 +139,7 @@ impl<'a, A: hil::analog_comparator::AnalogComparator<'a>> Driver for AnalogCompa
         &self,
         subscribe_num: usize,
         callback: Upcall,
-        _app_id: AppId,
+        _app_id: ProcessId,
     ) -> Result<Upcall, (Upcall, ErrorCode)> {
         match subscribe_num {
             // Subscribe to all interrupts

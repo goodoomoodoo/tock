@@ -47,18 +47,18 @@ pub trait Driver {
         &self,
         which: usize,
         callback: Callback,
-        app_id: AppId,
+        app_id: ProcessId,
     ) -> Result<Callback, (Callback, ErrorCode)> {
         Err((callback, ErrorCode::NOSUPPORT))
     }
 
-    fn command(&self, which: usize, r2: usize, r3: usize, caller_id: AppId) -> CommandResult {
+    fn command(&self, which: usize, r2: usize, r3: usize, caller_id: ProcessId) -> CommandResult {
         CommandResult::failure(ErrorCode::NOSUPPORT)
     }
 
     fn allow_readwrite(
         &self,
-        app: AppId,
+        app: ProcessId,
         which: usize,
         slice: ReadWriteAppSlice,
     ) -> Result<ReadWriteAppSlice, (ReadWriteAppSlice, ErrorCode)> {
@@ -67,7 +67,7 @@ pub trait Driver {
 
     fn allow_readonly(
         &self,
-        app: AppId,
+        app: ProcessId,
         which: usize,
         slice: ReadOnlyAppSlice,
     ) -> Result<ReadOnlyAppSlice, (ReadOnlyAppSlice, ErrorCode)> {
@@ -122,7 +122,7 @@ The LED capsule implements only commands, so it provides a very simple
 example of what commands look like.
 
 ```rust
- fn command(&self, command_num: usize, data: usize, _: usize, _: AppId) -> CommandResult {
+ fn command(&self, command_num: usize, data: usize, _: usize, _: ProcessId) -> CommandResult {
         self.leds
             .map(|leds| {
                 match command_num {
@@ -153,7 +153,7 @@ Here is a slightly more complex implementation of `command`, from the
 `console` capsule.
 
 ```rust
-    fn command(&self, cmd_num: usize, arg1: usize, _: usize, appid: AppId) -> CommandResult{
+    fn command(&self, cmd_num: usize, arg1: usize, _: usize, appid: ProcessId) -> CommandResult{
         let res = match cmd_num {
             0 => Ok(ReturnCode::SUCCESS),
             1 => { // putstr
@@ -243,7 +243,7 @@ pub struct App {
 ...
 	fn allow_readonly(
         &self,
-        appid: AppId,
+        appid: ProcessId,
         allow_num: usize,
         mut slice: ReadOnlyAppSlice,
     ) -> Result<ReadOnlyAppSlice, (ReadOnlyAppSlice, ErrorCode)> {
@@ -281,7 +281,7 @@ an example from `console`:
         &self,
         subscribe_num: usize,
         mut callback: Callback,
-        app_id: AppId,
+        app_id: ProcessId,
     ) -> Result<Callback, (Callback, ErrorCode)> {
         let res = match subscribe_num {
             1 => { // putstr/write done
@@ -325,7 +325,7 @@ use `mem::swap`. Instead, one can use `Cell::replace`. For example:
         &self,
         subscribe_num: usize,
         callback: Callback,
-        _app_id: AppId,
+        _app_id: ProcessId,
     ) -> Result<Callback, (Callback, ErrorCode)> {
         match subscribe_num {
             0 => Ok(self.callback.replace(callback)),
@@ -351,7 +351,7 @@ for example, to copy process data into its write buffer and
 call the underlying `transmit_buffer`:
 
 ```rust
-  fn send(&self, app_id: AppId, app: &mut App) {
+  fn send(&self, app_id: ProcessId, app: &mut App) {
         if self.tx_in_progress.is_none() {
             self.tx_in_progress.set(app_id);
             self.tx_buffer.take().map(|buffer| {

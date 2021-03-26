@@ -68,7 +68,7 @@
 //!   - Return: `SUCCESS` if the LED index was valid, `EINVAL` otherwise.
 
 use kernel::hil::gpio;
-use kernel::{AppId, CommandReturn, Driver, ErrorCode};
+use kernel::{ProcessId, CommandReturn, Driver, ErrorCode};
 
 use core::cell::Cell;
 use kernel::common::cells::TakeCell;
@@ -200,7 +200,7 @@ impl<'a, L: gpio::Pin, A: Alarm<'a>> Driver for LedMatrixDriver<'a, L, A> {
     ///        if the LED index is not valid.
     /// - `3`: Toggle the LED at index specified by `data` on or off. Returns
     ///        `EINVAL` if the LED index is not valid.
-    fn command(&self, command_num: usize, data: usize, _: usize, _: AppId) -> CommandReturn {
+    fn command(&self, command_num: usize, data: usize, _: usize, _: ProcessId) -> CommandReturn {
         match command_num {
             // get number of LEDs
             0 => CommandReturn::success_u32((self.cols.len() * self.rows.len()) as u32),
