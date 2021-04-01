@@ -17,7 +17,7 @@ use core::cell::Cell;
 use kernel::common::cells::TakeCell;
 use kernel::hil::gpio;
 use kernel::hil::i2c;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, ProcessId, Upcall};
 
 /// Syscall driver number.
 use crate::driver;

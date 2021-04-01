@@ -5,7 +5,7 @@ mod fmt;
 
 use core::cell::Cell;
 use kernel::hil::uart::{Transmit, TransmitClient};
-use kernel::{ProcessId, CommandReturn, ErrorCode, Grant, ReturnCode};
+use kernel::{CommandReturn, ErrorCode, Grant, ProcessId, ReturnCode};
 
 // LowLevelDebug requires a &mut [u8] buffer of length at least BUF_LEN.
 pub use fmt::BUF_LEN;
@@ -41,7 +41,13 @@ impl<'u, U: Transmit<'u>> LowLevelDebug<'u, U> {
 }
 
 impl<'u, U: Transmit<'u>> kernel::Driver for LowLevelDebug<'u, U> {
-    fn command(&self, minor_num: usize, r2: usize, r3: usize, caller_id: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        minor_num: usize,
+        r2: usize,
+        r3: usize,
+        caller_id: ProcessId,
+    ) -> CommandReturn {
         match minor_num {
             0 => return CommandReturn::success(),
             1 => self.push_entry(DebugEntry::AlertCode(r2), caller_id),

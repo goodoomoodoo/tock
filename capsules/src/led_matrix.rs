@@ -68,7 +68,7 @@
 //!   - Return: `SUCCESS` if the LED index was valid, `EINVAL` otherwise.
 
 use kernel::hil::gpio;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode};
+use kernel::{CommandReturn, Driver, ErrorCode, ProcessId};
 
 use core::cell::Cell;
 use kernel::common::cells::TakeCell;

@@ -44,7 +44,7 @@ use core::mem;
 use kernel::common::cells::OptionalCell;
 use kernel::hil;
 use kernel::hil::time::Frequency;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Grant, ReturnCode, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, Grant, ProcessId, ReturnCode, Upcall};
 
 /// Syscall driver number.
 use crate::driver;

@@ -28,7 +28,7 @@ use kernel::hil::entropy::{Entropy32, Entropy8};
 use kernel::hil::rng;
 use kernel::hil::rng::{Client, Continue, Random, Rng};
 use kernel::{
-    ProcessId, CommandReturn, Driver, ErrorCode, Grant, ReadWrite, ReadWriteAppSlice, ReturnCode,
+    CommandReturn, Driver, ErrorCode, Grant, ProcessId, ReadWrite, ReadWriteAppSlice, ReturnCode,
     Upcall,
 };
 
@@ -203,7 +203,13 @@ impl<'a> Driver for RngDriver<'a> {
         }
     }
 
-    fn command(&self, command_num: usize, data: usize, _: usize, appid: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        command_num: usize,
+        data: usize,
+        _: usize,
+        appid: ProcessId,
+    ) -> CommandReturn {
         match command_num {
             0 /* Check if exists */ =>
             {

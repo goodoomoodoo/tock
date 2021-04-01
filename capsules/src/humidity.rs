@@ -52,7 +52,7 @@ use core::cell::Cell;
 use core::mem;
 
 use kernel::hil;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Grant, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, Grant, ProcessId, Upcall};
 
 /// Syscall driver number.
 use crate::driver;
@@ -162,7 +162,13 @@ impl Driver for HumiditySensor<'_> {
         }
     }
 
-    fn command(&self, command_num: usize, arg1: usize, _: usize, appid: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        command_num: usize,
+        arg1: usize,
+        _: usize,
+        appid: ProcessId,
+    ) -> CommandReturn {
         match command_num {
             // check whether the driver exist!!
             0 => CommandReturn::success(),

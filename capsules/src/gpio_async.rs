@@ -27,8 +27,8 @@
 
 use core::cell::Cell;
 use kernel::hil;
-use kernel::{ProcessId, ErrorCode, Upcall};
 use kernel::{CommandReturn, Driver, ReturnCode};
+use kernel::{ErrorCode, ProcessId, Upcall};
 
 /// Syscall driver number.
 use crate::driver;

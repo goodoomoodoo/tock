@@ -40,7 +40,7 @@
 use core::cell::Cell;
 use kernel::common::cells::{MapCell, OptionalCell, TakeCell};
 use kernel::hil::i2c;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, ReturnCode, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, ProcessId, ReturnCode, Upcall};
 
 /// Syscall driver number.
 use crate::driver;

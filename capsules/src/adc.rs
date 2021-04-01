@@ -54,8 +54,8 @@ use core::{cmp, mem};
 use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil;
 use kernel::{
-    ProcessId, CommandReturn, Driver, ErrorCode, Grant, Read, ReadWrite, ReadWriteAppSlice, ReturnCode,
-    Upcall,
+    CommandReturn, Driver, ErrorCode, Grant, ProcessId, Read, ReadWrite, ReadWriteAppSlice,
+    ReturnCode, Upcall,
 };
 
 /// Syscall driver number.
@@ -1369,7 +1369,13 @@ impl Driver for AdcVirtualized<'_> {
     /// - `channel` - requested channel value
     /// - `_` - value sent by the application, unused
     /// - `appid` - application identifier
-    fn command(&self, command_num: usize, channel: usize, _: usize, appid: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        command_num: usize,
+        channel: usize,
+        _: usize,
+        appid: ProcessId,
+    ) -> CommandReturn {
         match command_num {
             // This driver exists and return the number of channels
             0 => CommandReturn::success_u32(self.drivers.len() as u32),

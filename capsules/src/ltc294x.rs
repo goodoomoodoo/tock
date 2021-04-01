@@ -50,7 +50,7 @@ use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil::gpio;
 use kernel::hil::i2c;
 use kernel::ReturnCode;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, ProcessId, Upcall};
 
 /// Syscall driver number.
 use crate::driver;

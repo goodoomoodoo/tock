@@ -39,7 +39,7 @@ pub const DRIVER_NUM: usize = driver::NUM::AnalogComparator as usize;
 
 use core::cell::Cell;
 use kernel::hil;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, ReturnCode, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, ProcessId, ReturnCode, Upcall};
 
 pub struct AnalogComparator<'a, A: hil::analog_comparator::AnalogComparator<'a> + 'a> {
     // Analog Comparator driver

@@ -16,7 +16,7 @@ use core::cell::Cell;
 use core::convert::TryFrom;
 use core::mem;
 use kernel::hil;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Grant, ReturnCode, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, Grant, ProcessId, ReturnCode, Upcall};
 
 /// Syscall driver number.
 use crate::driver;

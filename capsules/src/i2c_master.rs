@@ -4,7 +4,7 @@ use enum_primitive::enum_from_primitive;
 use kernel::common::cells::{MapCell, OptionalCell, TakeCell};
 use kernel::hil::i2c;
 use kernel::{
-    ProcessId, CommandReturn, Driver, ErrorCode, Grant, Read, ReadWrite, ReadWriteAppSlice, Upcall,
+    CommandReturn, Driver, ErrorCode, Grant, ProcessId, Read, ReadWrite, ReadWriteAppSlice, Upcall,
 };
 
 /// Syscall driver number.
@@ -44,7 +44,15 @@ impl<'a, I: 'a + i2c::I2CMaster> I2CMasterDriver<'a, I> {
         }
     }
 
-    fn operation(&self, app_id: ProcessId, app: &mut App, command: Cmd, addr: u8, wlen: u8, rlen: u8) {
+    fn operation(
+        &self,
+        app_id: ProcessId,
+        app: &mut App,
+        command: Cmd,
+        addr: u8,
+        wlen: u8,
+        rlen: u8,
+    ) {
         // TODO(alevy) this function used to try and return ReturnCodes, but would always return
         // ENOSUPPORT and all call-sites simply ignore the return value. Nonetheless, some error
         // handling is probably useful. Comments inline where there used to be non-success results.

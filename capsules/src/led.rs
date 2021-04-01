@@ -52,7 +52,7 @@
 
 use kernel::common::cells::TakeCell;
 use kernel::hil::led;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode};
+use kernel::{CommandReturn, Driver, ErrorCode, ProcessId};
 
 /// Syscall driver number.
 use crate::driver;

@@ -16,7 +16,7 @@ use crate::driver;
 pub const DRIVER_NUM: usize = driver::NUM::Dac as usize;
 
 use kernel::hil;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode};
+use kernel::{CommandReturn, Driver, ErrorCode, ProcessId};
 
 pub struct Dac<'a> {
     dac: &'a dyn hil::dac::DacChannel,

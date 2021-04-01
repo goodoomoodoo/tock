@@ -61,7 +61,7 @@ use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil;
 use kernel::ErrorCode;
 use kernel::{
-    ProcessId, CommandReturn, Driver, Grant, Read, ReadOnlyAppSlice, ReadWrite, ReadWriteAppSlice,
+    CommandReturn, Driver, Grant, ProcessId, Read, ReadOnlyAppSlice, ReadWrite, ReadWriteAppSlice,
     Upcall,
 };
 

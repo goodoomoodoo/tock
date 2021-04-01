@@ -22,7 +22,7 @@ use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::common::registers::register_bitfields;
 use kernel::hil::i2c::{self, Error};
 use kernel::hil::sensors;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, ReturnCode, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, ProcessId, ReturnCode, Upcall};
 
 /// Syscall driver number.
 pub const DRIVER_NUM: usize = driver::NUM::Mlx90614 as usize;
@@ -152,7 +152,13 @@ impl<'a> i2c::I2CClient for Mlx90614SMBus<'a> {
 }
 
 impl<'a> Driver for Mlx90614SMBus<'a> {
-    fn command(&self, command_num: usize, _data1: usize, _data2: usize, _: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        command_num: usize,
+        _data1: usize,
+        _data2: usize,
+        _: ProcessId,
+    ) -> CommandReturn {
         match command_num {
             0 => CommandReturn::success(),
             // Check is sensor is correctly connected

@@ -42,8 +42,8 @@ use core::{cmp, mem};
 
 use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil::uart;
-use kernel::{ProcessId, ErrorCode, Grant, Upcall};
 use kernel::{CommandReturn, Driver, ReturnCode};
+use kernel::{ErrorCode, Grant, ProcessId, Upcall};
 use kernel::{Read, ReadOnlyAppSlice, ReadWrite, ReadWriteAppSlice};
 
 /// Syscall driver number.

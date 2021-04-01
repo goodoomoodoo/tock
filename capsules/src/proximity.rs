@@ -52,7 +52,7 @@ use core::cell::Cell;
 use core::mem;
 use kernel::hil;
 use kernel::ReturnCode;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Grant, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, Grant, ProcessId, Upcall};
 
 /// Syscall driver number.
 use crate::driver;
@@ -300,7 +300,13 @@ impl Driver for ProximitySensor<'_> {
         }
     }
 
-    fn command(&self, command_num: usize, arg1: usize, arg2: usize, appid: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        command_num: usize,
+        arg1: usize,
+        arg2: usize,
+        appid: ProcessId,
+    ) -> CommandReturn {
         match command_num {
             // check whether the driver exist!!
             0 => CommandReturn::success(),

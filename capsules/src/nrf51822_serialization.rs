@@ -26,7 +26,7 @@ use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil;
 use kernel::hil::uart;
 use kernel::{
-    ProcessId, CommandReturn, Driver, ErrorCode, Grant, Read, ReadOnlyAppSlice, ReadWrite,
+    CommandReturn, Driver, ErrorCode, Grant, ProcessId, Read, ReadOnlyAppSlice, ReadWrite,
     ReadWriteAppSlice, ReturnCode, Upcall,
 };
 
@@ -208,7 +208,13 @@ impl Driver for Nrf51822Serialization<'_> {
     /// - `1`: Send the allowed buffer to the nRF.
     /// - `2`: Received from the nRF into the allowed buffer.
     /// - `3`: Reset the nRF51822.
-    fn command(&self, command_type: usize, arg1: usize, _: usize, appid: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        command_type: usize,
+        arg1: usize,
+        _: usize,
+        appid: ProcessId,
+    ) -> CommandReturn {
         match command_type {
             0 /* check if present */ => CommandReturn::success(),
 

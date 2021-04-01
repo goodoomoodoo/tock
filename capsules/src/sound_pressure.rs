@@ -57,7 +57,7 @@ use core::convert::TryFrom;
 use core::mem;
 use kernel::hil;
 use kernel::ReturnCode;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Grant, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, Grant, ProcessId, Upcall};
 
 /// Syscall driver number.
 use crate::driver;

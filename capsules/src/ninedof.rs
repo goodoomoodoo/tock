@@ -22,7 +22,7 @@ use core::mem;
 use kernel::common::cells::OptionalCell;
 use kernel::hil;
 use kernel::ReturnCode;
-use kernel::{ProcessId, CommandReturn, Driver, ErrorCode, Grant, Upcall};
+use kernel::{CommandReturn, Driver, ErrorCode, Grant, ProcessId, Upcall};
 
 /// Syscall driver number.
 use crate::driver;
@@ -72,7 +72,12 @@ impl<'a> NineDof<'a> {
     // Check so see if we are doing something. If not,
     // go ahead and do this command. If so, this is queued
     // and will be run when the pending command completes.
-    fn enqueue_command(&self, command: NineDofCommand, arg1: usize, appid: ProcessId) -> CommandReturn {
+    fn enqueue_command(
+        &self,
+        command: NineDofCommand,
+        arg1: usize,
+        appid: ProcessId,
+    ) -> CommandReturn {
         self.apps
             .enter(appid, |app, _| {
                 if self.current_app.is_none() {
@@ -211,7 +216,13 @@ impl Driver for NineDof<'_> {
         }
     }
 
-    fn command(&self, command_num: usize, arg1: usize, _: usize, appid: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        command_num: usize,
+        arg1: usize,
+        _: usize,
+        appid: ProcessId,
+    ) -> CommandReturn {
         match command_num {
             0 => CommandReturn::success(),
             // Single acceleration reading.

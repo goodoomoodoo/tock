@@ -27,7 +27,7 @@ use core::mem;
 use kernel::common::cells::{OptionalCell, TakeCell};
 use kernel::hil;
 use kernel::ErrorCode;
-use kernel::{ProcessId, CommandReturn, Driver, Grant, Read, ReadOnlyAppSlice, Upcall};
+use kernel::{CommandReturn, Driver, Grant, ProcessId, Read, ReadOnlyAppSlice, Upcall};
 
 /// Syscall driver number.
 use crate::driver;
@@ -226,7 +226,13 @@ impl Driver for AppFlash<'_> {
     ///
     /// - `0`: Driver check.
     /// - `1`: Write the memory from the `allow` buffer to the address in flash.
-    fn command(&self, command_num: usize, arg1: usize, _: usize, appid: ProcessId) -> CommandReturn {
+    fn command(
+        &self,
+        command_num: usize,
+        arg1: usize,
+        _: usize,
+        appid: ProcessId,
+    ) -> CommandReturn {
         match command_num {
             0 /* This driver exists. */ => {
                 CommandReturn::success()
