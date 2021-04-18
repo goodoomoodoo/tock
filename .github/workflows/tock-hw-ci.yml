@@ -17,11 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: cargo build --verbose
+      run: "cd ~; mkdir result"
       
   hello:
     name: hello
     runs-on: [self-hosted]
     steps:
     - id: step1
-      run: echo "hello world"
+      run: echo "hello" >> stdout.txt
