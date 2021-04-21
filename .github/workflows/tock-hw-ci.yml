@@ -19,6 +19,6 @@ jobs:
     - name: Build
       run: source ~/tock-test-harness/runner-build.sh
     - name: Test
-      run: echo "Cool"
+      run: cd ~ && echo "test" > stdout.txt
       
   
