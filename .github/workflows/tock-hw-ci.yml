@@ -18,7 +18,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: source ~/tock-test-harness/runner-build.sh
-    - name: Test
-      run: cd ~ && echo "test 3" > stdout.txt
+  install:
+    
+    runs-on: [self-hosted]
+    
+    steps:
+    - name: Install
+      run: source ~/tock-test-harness/runner-flash.sh
       
   
