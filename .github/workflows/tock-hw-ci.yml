@@ -19,7 +19,7 @@ jobs:
     - name: Build
       run: source ~/tock-test-harness/runner-build.sh
     - name: Test Flash
-      run: echo "test"
+      run: echo "test1"
       
   install:
     
