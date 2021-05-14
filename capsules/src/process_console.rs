@@ -12,6 +12,7 @@
 //!  - 'stop n' stops the process with name n
 //!  - 'start n' starts the stopped process with name n
 //!  - 'fault n' forces the process with name n into a fault state
+//!  - 'panic' causes the kernel to run the panic handler
 //!
 //! ### `list` Command Fields:
 //!
@@ -210,7 +211,7 @@ impl<'a, C: ProcessManagementCapability> ProcessConsole<'a, C> {
                         let clean_str = s.trim();
                         if clean_str.starts_with("help") {
                             debug!("Welcome to the process console.");
-                            debug!("Valid commands are: help status list stop start fault");
+                            debug!("Valid commands are: help status list stop start fault panic");
                         } else if clean_str.starts_with("start") {
                             let argument = clean_str.split_whitespace().nth(1);
                             argument.map(|name| {
@@ -260,7 +261,7 @@ impl<'a, C: ProcessManagementCapability> ProcessConsole<'a, C> {
                                     let info: KernelInfo = KernelInfo::new(self.kernel);
 
                                     let pname = proc.get_process_name();
-                                    let appid = proc.appid();
+                                    let appid = proc.processid();
                                     let (grants_used, grants_total) = info.number_app_grant_uses(appid, &self.capability);
 
                                     debug!(
@@ -290,6 +291,8 @@ impl<'a, C: ProcessManagementCapability> ProcessConsole<'a, C> {
                                 "Timeslice expirations: {}",
                                 info.timeslice_expirations(&self.capability)
                             );
+                        } else if clean_str.starts_with("panic") {
+                            panic!("ProcessConsole forced a kernel panic.");
                         } else {
                             debug!("Valid commands are: help status list stop start fault");
                         }

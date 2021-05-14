@@ -12,6 +12,7 @@ use capsules::virtual_hmac::VirtualMuxHmac;
 use earlgrey::chip::EarlGreyDefaultPeripherals;
 use kernel::capabilities;
 use kernel::common::dynamic_deferred_call::{DynamicDeferredCall, DynamicDeferredCallClientState};
+use kernel::common::registers::interfaces::ReadWriteable;
 use kernel::component::Component;
 use kernel::hil;
 use kernel::hil::i2c::I2CMaster;
@@ -38,7 +39,7 @@ const NUM_PROCS: usize = 4;
 //
 // Actual memory for holding the active process structures. Need an empty list
 // at least.
-static mut PROCESSES: [Option<&'static dyn kernel::procs::ProcessType>; 4] = [None; NUM_PROCS];
+static mut PROCESSES: [Option<&'static dyn kernel::procs::Process>; 4] = [None; NUM_PROCS];
 
 static mut CHIP: Option<
     &'static earlgrey::chip::EarlGrey<
@@ -48,7 +49,7 @@ static mut CHIP: Option<
 > = None;
 
 // How should the kernel respond when a process faults.
-const FAULT_RESPONSE: kernel::procs::FaultResponse = kernel::procs::FaultResponse::Panic;
+const FAULT_RESPONSE: kernel::procs::PanicFaultPolicy = kernel::procs::PanicFaultPolicy {};
 
 /// Dummy buffer that causes the linker to reserve enough space for the stack.
 #[no_mangle]
@@ -398,7 +399,7 @@ pub unsafe fn main() {
             &_eappmem as *const u8 as usize - &_sappmem as *const u8 as usize,
         ),
         &mut PROCESSES,
-        FAULT_RESPONSE,
+        &FAULT_RESPONSE,
         &process_mgmt_cap,
     )
     .unwrap_or_else(|err| {

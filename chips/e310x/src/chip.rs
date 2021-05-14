@@ -2,6 +2,7 @@
 
 use core::fmt::Write;
 use kernel;
+use kernel::common::registers::interfaces::{ReadWriteable, Readable};
 use kernel::debug;
 use kernel::hil::time::Alarm;
 use kernel::Chip;
@@ -150,6 +151,14 @@ impl<'a, A: 'static + Alarm<'static>, I: InterruptService<()> + 'a> kernel::Chip
     }
 
     fn has_pending_interrupts(&self) -> bool {
+        // First check if the global machine timer interrupt is set.
+        // We would also need to check for additional global interrupt bits
+        // if there were to be used for anything in the future.
+        if CSR.mip.is_set(mip::mtimer) {
+            return true;
+        }
+
+        // Then we can check the PLIC.
         self.plic.get_saved_interrupts().is_some()
     }
 

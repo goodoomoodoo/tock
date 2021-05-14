@@ -35,14 +35,14 @@ mod virtual_uart_rx_test;
 const NUM_PROCS: usize = 4;
 
 // Actual memory for holding the active process structures.
-static mut PROCESSES: [Option<&'static dyn kernel::procs::ProcessType>; NUM_PROCS] =
+static mut PROCESSES: [Option<&'static dyn kernel::procs::Process>; NUM_PROCS] =
     [None, None, None, None];
 
 // Static reference to chip for panic dumps.
 static mut CHIP: Option<&'static stm32f303xc::chip::Stm32f3xx<Stm32f3xxDefaultPeripherals>> = None;
 
 // How should the kernel respond when a process faults.
-const FAULT_RESPONSE: kernel::procs::FaultResponse = kernel::procs::FaultResponse::Panic;
+const FAULT_RESPONSE: kernel::procs::PanicFaultPolicy = kernel::procs::PanicFaultPolicy {};
 
 /// Dummy buffer that causes the linker to reserve enough space for the stack.
 #[no_mangle]
@@ -594,7 +594,7 @@ pub unsafe fn main() {
     let spi_mux = components::spi::SpiMuxComponent::new(&peripherals.spi1)
         .finalize(components::spi_mux_component_helper!(stm32f303xc::spi::Spi));
 
-    let l3gd20 = components::l3gd20::L3gd20SpiComponent::new().finalize(
+    let l3gd20 = components::l3gd20::L3gd20SpiComponent::new(board_kernel).finalize(
         components::l3gd20_spi_component_helper!(
             // spi type
             stm32f303xc::spi::Spi,
@@ -623,7 +623,7 @@ pub unsafe fn main() {
         components::i2c::I2CMuxComponent::new(&peripherals.i2c1, None, dynamic_deferred_caller)
             .finalize(components::i2c_mux_component_helper!());
 
-    let lsm303dlhc = components::lsm303dlhc::Lsm303dlhcI2CComponent::new()
+    let lsm303dlhc = components::lsm303dlhc::Lsm303dlhcI2CComponent::new(board_kernel)
         .finalize(components::lsm303dlhc_i2c_component_helper!(mux_i2c));
 
     lsm303dlhc.configure(
@@ -762,7 +762,7 @@ pub unsafe fn main() {
             &_eappmem as *const u8 as usize - &_sappmem as *const u8 as usize,
         ),
         &mut PROCESSES,
-        FAULT_RESPONSE,
+        &FAULT_RESPONSE,
         &process_management_capability,
     )
     .unwrap_or_else(|err| {

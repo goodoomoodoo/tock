@@ -41,13 +41,12 @@ pub mod io;
 
 // State for loading and holding applications.
 // How should the kernel respond when a process faults.
-const FAULT_RESPONSE: kernel::procs::FaultResponse = kernel::procs::FaultResponse::Panic;
+const FAULT_RESPONSE: kernel::procs::PanicFaultPolicy = kernel::procs::PanicFaultPolicy {};
 
 // Number of concurrent processes this platform supports.
 const NUM_PROCS: usize = 4;
 
-static mut PROCESSES: [Option<&'static dyn kernel::procs::ProcessType>; NUM_PROCS] =
-    [None; NUM_PROCS];
+static mut PROCESSES: [Option<&'static dyn kernel::procs::Process>; NUM_PROCS] = [None; NUM_PROCS];
 
 /// Dummy buffer that causes the linker to reserve enough space for the stack.
 #[no_mangle]
@@ -112,11 +111,10 @@ impl kernel::Platform for Platform {
 /// these static_inits is wasted.
 #[inline(never)]
 unsafe fn get_peripherals() -> &'static mut Nrf52832DefaultPeripherals<'static> {
-    let ppi = static_init!(nrf52832::ppi::Ppi, nrf52832::ppi::Ppi::new());
     // Initialize chip peripheral drivers
     let nrf52832_peripherals = static_init!(
         Nrf52832DefaultPeripherals,
-        Nrf52832DefaultPeripherals::new(ppi)
+        Nrf52832DefaultPeripherals::new()
     );
 
     nrf52832_peripherals
@@ -345,7 +343,10 @@ pub unsafe fn main() {
     // `gpio_async` is the object that manages all of the extenders.
     let gpio_async = static_init!(
         capsules::gpio_async::GPIOAsync<'static, capsules::mcp230xx::MCP230xx<'static>>,
-        capsules::gpio_async::GPIOAsync::new(async_gpio_ports)
+        capsules::gpio_async::GPIOAsync::new(
+            async_gpio_ports,
+            board_kernel.create_grant(&memory_allocation_capability)
+        ),
     );
     // Setup the clients correctly.
     for port in async_gpio_ports.iter() {
@@ -521,7 +522,7 @@ pub unsafe fn main() {
             &_eappmem as *const u8 as usize - &_sappmem as *const u8 as usize,
         ),
         &mut PROCESSES,
-        FAULT_RESPONSE,
+        &FAULT_RESPONSE,
         &process_management_capability,
     )
     .unwrap_or_else(|err| {

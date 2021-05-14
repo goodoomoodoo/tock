@@ -58,13 +58,12 @@ pub mod io;
 
 // State for loading and holding applications.
 // How should the kernel respond when a process faults.
-const FAULT_RESPONSE: kernel::procs::FaultResponse = kernel::procs::FaultResponse::Panic;
+const FAULT_RESPONSE: kernel::procs::PanicFaultPolicy = kernel::procs::PanicFaultPolicy {};
 
 // Number of concurrent processes this platform supports.
 const NUM_PROCS: usize = 4;
 
-static mut PROCESSES: [Option<&'static dyn kernel::procs::ProcessType>; NUM_PROCS] =
-    [None; NUM_PROCS];
+static mut PROCESSES: [Option<&'static dyn kernel::procs::Process>; NUM_PROCS] = [None; NUM_PROCS];
 
 static mut CHIP: Option<&'static nrf52833::chip::NRF52<Nrf52833DefaultPeripherals>> = None;
 
@@ -139,11 +138,10 @@ impl kernel::Platform for Platform {
 /// these static_inits is wasted.
 #[inline(never)]
 unsafe fn get_peripherals() -> &'static mut Nrf52833DefaultPeripherals<'static> {
-    let ppi = static_init!(nrf52833::ppi::Ppi, nrf52833::ppi::Ppi::new());
     // Initialize chip peripheral drivers
     let nrf52833_peripherals = static_init!(
         Nrf52833DefaultPeripherals,
-        Nrf52833DefaultPeripherals::new(ppi)
+        Nrf52833DefaultPeripherals::new()
     );
 
     nrf52833_peripherals
@@ -341,7 +339,7 @@ pub unsafe fn main() {
 
     // LSM303AGR
 
-    let lsm303agr = components::lsm303agr::Lsm303agrI2CComponent::new()
+    let lsm303agr = components::lsm303agr::Lsm303agrI2CComponent::new(board_kernel)
         .finalize(components::lsm303agr_i2c_component_helper!(sensors_i2c_bus));
 
     lsm303agr.configure(
@@ -549,7 +547,7 @@ pub unsafe fn main() {
             &_eappmem as *const u8 as usize - &_sappmem as *const u8 as usize,
         ),
         &mut PROCESSES,
-        FAULT_RESPONSE,
+        &FAULT_RESPONSE,
         &process_management_capability,
     )
     .unwrap_or_else(|err| {
