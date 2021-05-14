@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: python3 ~/tock-test-harness/runner_build.py
+      run: python3 ~/tock-test-harness/lib/main.py -b
       
   install:
     
@@ -24,6 +24,14 @@ jobs:
     needs: build
     steps:
     - name: Install
-      run: python3 ~/tock-test-harness/runner_init.py
+      run: python3 ~/tock-test-harness/lib/main.py -i
+      
+  test:
+    
+    runs-on: [self-hosted]
+    needs: install
+    steps:
+    - name: HW Test
+      run: python3 ~/tock-test-harness/lib/main.py -t
       
   
