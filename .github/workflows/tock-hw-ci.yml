@@ -13,7 +13,7 @@ env:
 jobs:
   build:
 
-    runs-on: [self-hosted]
+    runs-on: [nrf52dk]
     steps:
     - uses: actions/checkout@v2
     - name: Build
@@ -21,7 +21,7 @@ jobs:
       
   install:
     
-    runs-on: [self-hosted]
+    runs-on: [nrf52dk]
     needs: build
     steps:
     - name: Install
