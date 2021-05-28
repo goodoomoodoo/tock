@@ -26,4 +26,5 @@ title = "Test Configuration Sample"
 
     [test.all]
     # List the application(s) that will be installed for tests
+    # Demo
     app = ["gpio"]
