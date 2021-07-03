@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: python3 ~/tock-test-harness/lib/main.py -b
+      run: echo hello; python3 ~/tock-test-harness/lib/main.py -b
       
   install:
     
